@@ -56,9 +56,9 @@
 ---
 如果觉得有用的话，不妨打赏支持一下，您的支持就是我最大的动力。
 
-<img src=".\picture\qr_wechat.png" width="45%"/>
-<img src=".\picture\qr_alipay.jpg" width="45%"/>
-<img src=".\picture\qr_ali_redbag.jpg" width="45%"/>
+<img src="./picture/qr_wechat.png" width="45%" alt=""/>
+<img src="./picture/qr_alipay.jpg" width="45%" alt=""/>
+<img src="./picture/qr_ali_redbag.jpg" width="45%" alt=""/>
 
 ### Others
 
