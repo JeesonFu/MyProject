@@ -107,7 +107,7 @@ const validatePassword = (rule, value, callback) => {
 const rules = {
     email: [
         { required: true, message: '请输入邮件地址', trigger: 'blur' },
-        {type: 'email', message: '请输入合法的电子邮件地址', trigger: ['blur', 'change'] },
+        { type: 'email', message: '请输入合法的电子邮件地址', trigger: ['blur', 'change'] },
     ],
     code: [
         { required: true, min: 4, message: '请输入验证码', trigger: 'blur' },
@@ -154,7 +154,7 @@ const startReset = () => {
                 active.value++
             })
         } else {
-            ElMessage.warning('请填写邮件地址和验证码')
+            // ElMessage.warning('请填写邮件地址和验证码')
         }
     })
 }
@@ -175,7 +175,7 @@ const doReset = () => {
                 router.push('/login')
             })
         } else {
-            ElMessage.warning('请填写新的密码')
+            // ElMessage.warning('请填写新的密码')
         }
     })
 }

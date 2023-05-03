@@ -4,6 +4,7 @@ import cn.jeeson.backend.entity.auth.Account;
 import cn.jeeson.backend.mapper.UserMapper;
 import cn.jeeson.backend.service.AuthorizeService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.MailException;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @Version 1.0
  */
 @Service
+@Slf4j
 public class AuthorizeServiceImpl implements AuthorizeService {
 
     @Value("${spring.mail.username}")
@@ -70,26 +72,31 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     @Override
     public String sendValidateEmail(String email, String sessionId, boolean hasAccount, String used) {
         String key = "email:" + sessionId + ":" + email + ":" + hasAccount;
+        String key2 = "email:" + sessionId + ":" + email + ":reset-cd";
+        if (used.equals("reset-password")) {
+            if (Boolean.TRUE.equals(template.hasKey(key2))) {
+                return "请求频繁，请稍后再试";
+            }
+        }
         if (Boolean.TRUE.equals(template.hasKey(key))) {
             Long expire = Optional.ofNullable(template.getExpire(key, TimeUnit.SECONDS)).orElse(0L);
             if(expire > 240)
                 return "请求频繁，请稍后再试";
         }
 
-        Account account = userMapper.findAccountByNameOrEmail(email);
-        if(hasAccount && account == null)
-            return "此邮箱未注册";
-        if(!hasAccount && account != null)
-            return "此邮箱已被注册";
+        if (isEmailRegistered(email, hasAccount)) {
+            return hasAccount ? "此邮箱未注册" : "此邮箱已被注册";
+        }
 
         Random random = new Random();
-        int code = random.nextInt(9000) + 1000;
+        int code = random.nextInt(10000);
+        String codeStr = String.format("%04d", code);
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
         message.setTo(email);
         message.setSubject("来自 JeesonTools 的验证邮件");
 
-        String text = "验证码：" + code + "，有效期5分钟。如非您本人操作，请忽略此邮件。";
+        String text = "验证码：" + codeStr + "，有效期5分钟。如非您本人操作，请忽略此邮件。";
         if (used.equals("register"))
             message.setText("您正在注册JeesonTools帐号，" + text);
         else if (used.equals("reset-password"))
@@ -99,12 +106,20 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
         try {
             mailSender.send(message);
-            template.opsForValue().set(key, String.valueOf(code), 5, TimeUnit.MINUTES);
+            template.opsForValue().set(key, codeStr, 5, TimeUnit.MINUTES);
+            if (used.equals("reset-password")) {
+                template.opsForValue().set(key2, codeStr, 1, TimeUnit.MINUTES);
+            }
             return null;
         } catch (MailException e) {
-            e.printStackTrace();
+            log.error("sendValidateEmail: 邮件发送失败", e);
             return "邮件发送失败，请检查邮件地址是否有效";
         }
+    }
+
+    private boolean isEmailRegistered(String email, boolean hasAccount) {
+        Account account = userMapper.findAccountByNameOrEmail(email);
+        return hasAccount && account == null || !hasAccount && account != null;
     }
 
     /**
@@ -138,7 +153,7 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     }
 
     /**
-     * 验证邮件验证码正确
+     * 重置密码，验证邮件验证码正确
      */
     @Override
     public String validateOnly(String email, String code, String sessionId) {
@@ -162,8 +177,10 @@ public class AuthorizeServiceImpl implements AuthorizeService {
      * 重置密码
      */
     @Override
-    public boolean resetPassword(String email, String password) {
+    public boolean resetPassword(String email, String password, String sessionId) {
+        String key = "email:" + sessionId + ":" + email + ":reset-cd";
         password = encoder.encode(password);
+        template.delete(key);
         return userMapper.resetPasswordByEmail(email, password) > 0;
     }
 }

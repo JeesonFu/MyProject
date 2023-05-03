@@ -43,7 +43,8 @@ public class AuthorizeController {
     }
 
     /**
-     * 用户存在，发送验证邮件
+     * 通用：
+     * 对存在的用户，发送验证邮件
      */
     @PostMapping("/valid-email")
     public RestBean<String> validateResetEmail(@Pattern(regexp = EMAIL_REGEX) @RequestParam("email") String email,
@@ -57,7 +58,7 @@ public class AuthorizeController {
     }
 
     /**
-     * 验证并注册
+     * 验证并注册用户
      */
     @PostMapping("/register")
     public RestBean<String> registerUser(@Pattern(regexp = USERNAME_REGEX) @Length(min = 6, max = 16) @RequestParam("username") String username,
@@ -73,10 +74,8 @@ public class AuthorizeController {
     }
 
     /**
-     * 重置密码，验证邮件验证码
-     * 1. 发送验证邮件
-     * 2. 验证验证码正确，正确则在session中存标记
-     * 3. 用户发起重置密码请求，存在标记则重置
+     * 重置密码：
+     * 验证邮件验证码：验证码正确则在session中存标记
      */
     @PostMapping("/start-reset")
     public RestBean<String> startReset(@Pattern(regexp = EMAIL_REGEX) @RequestParam("email") String email,
@@ -93,6 +92,9 @@ public class AuthorizeController {
 
     /**
      * 重置密码
+     * 1. 发送验证邮件
+     * 2. 通过startReset验证验证码正确，正确则在session中存标记
+     * 3. 用户发起重置密码请求，存在标记则重置
      */
     @PostMapping("/do-reset")
     public RestBean<String> resetPassword(@Length(min = 6, max = 16) @RequestParam("password") String password,
@@ -100,7 +102,7 @@ public class AuthorizeController {
         String email = (String) session.getAttribute("reset-password");
         if(email == null) {
             return RestBean.failure(401, "请先完成邮箱验证");
-        } else if(service.resetPassword(email, password)) {
+        } else if(service.resetPassword(email, password, session.getId())) {
             session.removeAttribute("reset-password");
             return RestBean.success("密码重置成功");
         } else {

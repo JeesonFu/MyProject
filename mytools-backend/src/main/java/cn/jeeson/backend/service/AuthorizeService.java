@@ -28,5 +28,5 @@ public interface AuthorizeService extends UserDetailsService {
     /**
      * 重置密码
      */
-    boolean resetPassword(String email, String password);
+    boolean resetPassword(String email, String password, String sessionId);
 }

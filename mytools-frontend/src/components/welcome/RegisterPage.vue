@@ -111,7 +111,7 @@ const rules = {
     ],
     email: [
         { required: true, message: '请输入邮件地址', trigger: 'blur' },
-        {type: 'email', message: '请输入合法的电子邮件地址', trigger: ['blur', 'change'] },
+        { type: 'email', message: '请输入合法的电子邮件地址', trigger: ['blur', 'change'] },
     ],
     code: [
         { required: true, min: 4, message: '请输入验证码', trigger: 'blur' },
@@ -140,7 +140,7 @@ const register = () => {
                 router.push('/login')
             })
         } else {
-            ElMessage.warning('请完整填写注册信息')
+            // ElMessage.warning('请完整填写注册信息')
         }
     })
 }
