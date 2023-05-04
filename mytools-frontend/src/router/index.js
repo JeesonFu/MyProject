@@ -54,9 +54,14 @@ const router = createRouter({
 
         },
         {
-          path: '/denied', //无权限页面
+          path: '/denied', //403无权限
           name: 'AccessDenied',
           component: () => import('@/components/error/DeniedPage.vue')
+        },
+        {
+          path: '/network', //网络异常
+          name: 'Network',
+          component: () => import('@/components/error/NetErrorPage.vue')
         }
       ]
     },
@@ -66,35 +71,42 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const store = useStore()
 
-  if(store.auth.user == null) {
-    get('/api/user/status', (message) => { //有登陆
-      store.auth.user = message
-      if(store.auth.user.role === 0 && to.path.startsWith('/admin')) {
-        next('/denied')
-      } else if(to.matched.length === 0){
-        next('/error')
-      } else if(to.name.startsWith('welcome-')){
-        next('/index')
-      }  else {
-        next()
-      }
-    }, () => {  //未登录
-      store.auth.user = null
-      if(to.path.startsWith('/admin')) {
-        next('/login')
-      } else if(to.matched.length === 0){
-        next('/error')
-      } else {
-        next()
-      }
-    })
-  } else if(store.auth.user.role === 0 && to.path.startsWith('/admin')) {
-    next('/denied')
-  } else if(to.matched.length === 0){
-    next('/error')
-  } else if(to.name.startsWith('welcome-')){
-    next('/index')
-  }  else {
+  if (store.net.status === true) {
+    if(store.auth.user == null) {
+      get('/api/user/status', (message) => { //有登陆
+        store.auth.user = message
+        if(store.auth.user.role === 0 && to.path.startsWith('/admin')) {
+          next('/denied')
+        } else if(to.matched.length === 0){
+          next('/error')
+        } else if(to.name.startsWith('welcome-')){
+          next('/index')
+        }  else {
+          next()
+        }
+      }, () => {  //未登录
+        store.auth.user = null
+        if(to.path.startsWith('/admin')) {
+          next('/login')
+        } else if(to.matched.length === 0){
+          next('/error')
+        } else {
+          next()
+        }
+      }, () => {
+        store.net.status = false
+        next('/network')
+      })
+    } else if(store.auth.user.role === 0 && to.path.startsWith('/admin')) {
+      next('/denied')
+    } else if(to.matched.length === 0){
+      next('/error')
+    } else if(to.name.startsWith('welcome-')){
+      next('/index')
+    }  else {
+      next()
+    }
+  } else {
     next()
   }
 

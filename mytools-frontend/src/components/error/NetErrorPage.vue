@@ -1,7 +1,7 @@
 <template>
-  <div>
-      ご主人様~，没有得到站长大人的允许，您不能去那里哦
-  </div>
+    <div>
+        あ~れ~，ご主人様~，好像网络出问题了呢，请稍后再试吧
+    </div>
 </template>
 
 <script setup>

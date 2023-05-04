@@ -6,5 +6,9 @@ export const useStore = defineStore('store', () => {
     user: null
   })
 
-  return { auth }
+  const net = reactive({
+    status: true
+  })
+
+  return { auth, net }
 })
