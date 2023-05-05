@@ -7,7 +7,8 @@ export const useStore = defineStore('store', () => {
   })
 
   const net = reactive({
-    status: true
+    status: true,
+    notFound: false
   })
 
   return { auth, net }

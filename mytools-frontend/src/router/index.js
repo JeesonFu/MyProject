@@ -50,7 +50,7 @@ const router = createRouter({
         {
           path: '', //404
           name: 'NotFound',
-          component: () => import('@/components/error/ErrorPage.vue'),
+          component: () => import('@/components/error/NotFoundPage.vue'),
 
         },
         {
@@ -71,14 +71,14 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const store = useStore()
 
-  if (store.net.status === true) {
+  if(to.matched.length === 0 || to.path === '/error') {
+    store.net.notFound = true
+  } else if (store.net.status === true) {
     if(store.auth.user == null) {
-      get('/api/user/status', (message) => { //有登陆
+      get('/api/user/status', (message) => {  //有登陆
         store.auth.user = message
         if(store.auth.user.role === 0 && to.path.startsWith('/admin')) {
           next('/denied')
-        } else if(to.matched.length === 0){
-          next('/error')
         } else if(to.name.startsWith('welcome-')){
           next('/index')
         }  else {
@@ -88,26 +88,21 @@ router.beforeEach((to, from, next) => {
         store.auth.user = null
         if(to.path.startsWith('/admin')) {
           next('/login')
-        } else if(to.matched.length === 0){
-          next('/error')
         } else {
           next()
         }
       }, () => {
         store.net.status = false
-        next('/network')
       })
     } else if(store.auth.user.role === 0 && to.path.startsWith('/admin')) {
       next('/denied')
-    } else if(to.matched.length === 0){
-      next('/error')
     } else if(to.name.startsWith('welcome-')){
       next('/index')
     }  else {
       next()
     }
   } else {
-    next()
+
   }
 
 })
