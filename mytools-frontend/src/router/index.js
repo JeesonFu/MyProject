@@ -7,12 +7,18 @@ const router = createRouter({
   routes: [
     {
       path: '/',  //空地址重定向到index
-      redirect: '/index'
+      redirect: '/index',
+      meta: {
+        title: '首页'
+      }
     },
     {
       path: '/index',  //前台首页，视具体功能设置登录拦截
       name: 'index',
-      component: () => import('@/views/IndexView.vue')
+      component: () => import('@/views/IndexView.vue'),
+      meta: {
+        title: '首页'
+      }
     },
     {
       path: '/', //登录功能子页面
@@ -20,27 +26,38 @@ const router = createRouter({
       component: () => import('@/views/WelcomeView.vue'),
       children: [
         {
-          path: 'login', //登录页面
+          path: 'login',
           name: 'welcome-login',
           component: () => import('@/components/welcome/LoginPage.vue'),
-
+          meta: {
+            title: '用户登录'
+          }
         },
         {
-          path: 'register', //注册页面
+          path: 'register',
           name: 'welcome-register',
-          component: () => import('@/components/welcome/RegisterPage.vue')
+          component: () => import('@/components/welcome/RegisterPage.vue'),
+          meta: {
+            title: '用户注册'
+          }
         },
         {
           path: 'forget', //忘记密码页面
           name: 'welcome-forget',
-          component: () => import('@/components/welcome/ForgetPage.vue')
+          component: () => import('@/components/welcome/ForgetPage.vue'),
+          meta: {
+            title: '重置密码'
+          }
         }
       ]
     },
     {
       path: '/admin', //后台首页
       name: 'admin',
-      component: () => import('@/views/manage/IndexView.vue')
+      component: () => import('@/views/manage/IndexView.vue'),
+      meta: {
+        title: '后台管理'
+      }
     },
     {
       path: '/error', //错误页面
@@ -51,17 +68,25 @@ const router = createRouter({
           path: '', //404
           name: 'NotFound',
           component: () => import('@/components/error/NotFoundPage.vue'),
-
+          meta: {
+            title: '页面丢失'
+          }
         },
         {
-          path: '/denied', //403无权限
+          path: '/denied', //403
           name: 'AccessDenied',
-          component: () => import('@/components/error/DeniedPage.vue')
+          component: () => import('@/components/error/DeniedPage.vue'),
+          meta: {
+            title: '无权限'
+          }
         },
         {
-          path: '/network', //网络异常
+          path: '/network',
           name: 'Network',
-          component: () => import('@/components/error/NetErrorPage.vue')
+          component: () => import('@/components/error/NetErrorPage.vue'),
+          meta: {
+            title: '网络异常'
+          }
         }
       ]
     },
@@ -73,7 +98,9 @@ router.beforeEach((to, from, next) => {
 
   if(to.matched.length === 0 || to.path === '/error') {
     store.net.notFound = true
+    document.title = 'Error'
   } else if (store.net.status === true) {
+    document.title = to.meta.title
     if(store.auth.user == null) {
       get('/api/user/status', (message) => {  //有登陆
         store.auth.user = message
@@ -102,7 +129,7 @@ router.beforeEach((to, from, next) => {
       next()
     }
   } else {
-
+    document.title = '网络异常'
   }
 
 })
