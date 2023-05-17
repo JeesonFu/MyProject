@@ -31,11 +31,14 @@
 ### 技术栈
 
 ---
-+ SpringBoot 3
-+ Vue 3
-+ Axios
-+ MySQL 8
-+ Redis
++ SpringBoot 3 + Maven （Java 17）
+   + MySQL 8
+   + Redis
+   + Lombok
++ Vue 3 （Html5 / CSS3 / JavaScript）
+   + NodeJS / Vite / Pinia
+   + Axios
+   + element-plus
 
  ### 参考项目
 
